@@ -8,7 +8,12 @@ import {
 import '../../index.css';
 
 const WA = '573012089947';
-const waLink = (msg) => `https://api.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`;
+const waLink = (msg) => {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return isMobile 
+    ? `https://api.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`
+    : `https://web.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`;
+};
 const openWA = (msg) => { window.location.href = waLink(msg); };
 
 const formatPrice = (n) =>
