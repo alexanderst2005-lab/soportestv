@@ -3,7 +3,7 @@ import { supabase } from '../../supabaseClient';
 import {
   Tv, Wrench, Zap, Lock, ChevronRight, MessageCircle,
   Shield, Headphones, MapPin, Star, Menu, X, ArrowRight,
-  Package, Settings, CheckCircle, Phone, ThumbsUp
+  Package, Settings, CheckCircle, Phone, ThumbsUp, Music
 } from 'lucide-react';
 import '../../index.css';
 
@@ -414,17 +414,20 @@ export default function App() {
                 <button className="footer-link" onClick={() => scrollTo('instalacion')}>Agendar instalación</button>
               </div>
             </div>
+            <div className="footer-col">
+              <h4>Redes Sociales</h4>
+              <div className="footer-links">
+                <a href="https://www.facebook.com/share/1LkakVUFqu/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="footer-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ThumbsUp size={16}/> Facebook
+                </a>
+                <a href="https://www.tiktok.com/@obras_civiles_emanuel?_r=1&fbclid=IwdGRjcAUemRpwZG9mAWZkaWQWUO1a7MpzHyaDGFlsB-Wx29VTqfx0MGV4dG4DYWVtAjExAHNydGMGYXBwX2lkCjY2Mjg1NjgzNzkAAR57zv8PYUQPcHL_NFoI2SnxK1nOOR-l8_2Wa5BaP37m1VbEIaX2QVwRLCOjPA_aem_h1r7ll5kqbTPnLYsbebD8A" target="_blank" rel="noopener noreferrer" className="footer-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Music size={16}/> TikTok
+                </a>
+              </div>
+            </div>
           </div>
           <div className="footer-bottom">
             <span className="footer-copyright">© {new Date().getFullYear()} Emmanuel Obras Civiles. Todos los derechos reservados.</span>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <a href="https://www.facebook.com/share/1LkakVUFqu/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={{ color: '#FACC15', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}>
-                <ThumbsUp size={18}/> Facebook
-              </a>
-              <button className="footer-wa-link" onClick={() => openWA('Hola, quiero contactarlos.')}>
-                <MessageCircle size={16}/> Contactar por WhatsApp
-              </button>
-            </div>
           </div>
         </div>
       </footer>
