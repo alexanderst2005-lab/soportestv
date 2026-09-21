@@ -167,22 +167,23 @@ function App() {
                 <div className="product-image-container">
                   <img src={item.image_url} alt={item.name} className="product-image" loading="lazy" />
                 </div>
-                <div className="product-content">
-                  <h3 className="product-name">{item.name}</h3>
-                  <p className="product-desc">{item.description}</p>
-                  <div className="product-price-row">
-                    <span className="product-price">{formatPrice(item.price)}</span>
-                    {item.old_price && <span className="product-old-price">{formatPrice(item.old_price)}</span>}
+                <div className="product-card-body">
+                  <div className="product-content">
+                    <h3 className="product-name">{item.name}</h3>
+                    <p className="product-desc">{item.description}</p>
+                    <div className="product-price-row">
+                      <span className="product-price">{formatPrice(item.price)}</span>
+                      {item.old_price && <span className="product-old-price">{formatPrice(item.old_price)}</span>}
+                    </div>
                   </div>
+                  <button
+                    className="mobile-wa-btn mobile-only"
+                    onClick={() => handleWhatsApp(`Hola, me interesa comprar el ${item.name} por ${formatPrice(item.price)}.`)}
+                  >
+                    <MessageCircle size={15} /> COMPRAR AHORA
+                  </button>
                   <button className="btn btn-outline product-btn desktop-only" onClick={() => handleWhatsApp(`Hola, me interesa comprar el ${item.name} por ${formatPrice(item.price)}.`)}>COMPRAR AHORA</button>
                 </div>
-                <button
-                  className="mobile-wa-btn mobile-only"
-                  onClick={() => handleWhatsApp(`Hola, me interesa comprar el ${item.name} por ${formatPrice(item.price)}.`)}
-                  aria-label={`Consultar por ${item.name} en WhatsApp`}
-                >
-                  <MessageCircle size={18} />
-                </button>
               </div>
             ))}
           </div>
@@ -248,23 +249,24 @@ function App() {
               return (
                 <div className="product-card glass-card" key={srv.id}>
                   <div className="product-icon-container">
-                    <ServiceIcon size={32} />
+                    <ServiceIcon size={34} />
                   </div>
-                  <div className="product-content">
-                    <h3 className="product-name">{srv.name}</h3>
-                    <p className="product-desc">{srv.description}</p>
-                    <div className="product-price-row">
-                      <span className="product-price">{formatPrice(srv.price)}</span>
+                  <div className="product-card-body">
+                    <div className="product-content">
+                      <h3 className="product-name">{srv.name}</h3>
+                      <p className="product-desc">{srv.description}</p>
+                      <div className="product-price-row">
+                        <span className="product-price">{formatPrice(srv.price)}</span>
+                      </div>
                     </div>
+                    <button
+                      className="mobile-wa-btn mobile-only"
+                      onClick={() => handleWhatsApp(`Hola, necesito el ${srv.name}.`)}
+                    >
+                      <MessageCircle size={15} /> SOLICITAR AHORA
+                    </button>
                     <button className="btn btn-outline product-btn desktop-only" onClick={() => handleWhatsApp(`Hola, necesito el ${srv.name}.`)}>SOLICITAR</button>
                   </div>
-                  <button
-                    className="mobile-wa-btn mobile-only"
-                    onClick={() => handleWhatsApp(`Hola, necesito el ${srv.name}.`)}
-                    aria-label={`Solicitar ${srv.name} por WhatsApp`}
-                  >
-                    <MessageCircle size={18} />
-                  </button>
                 </div>
               );
             })}
