@@ -202,11 +202,10 @@ export default function App() {
           <h2 className="section-title">NUESTRO <span className="text-yellow">CATÁLOGO</span></h2>
           <p className="section-subtitle">Todos los productos disponibles para entrega y montaje a domicilio.</p>
           {loading ? (
-            <div className="catalog-loading">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <div style={{ width: 20, height: 20, border: '2px solid rgba(250,204,21,0.3)', borderTop: '2px solid #FACC15', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                Cargando catálogo...
-              </div>
+            <div className="catalog-grid">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="product-card" style={{ minHeight: '400px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', animation: 'pulse 1.5s infinite' }} />
+              ))}
             </div>
           ) : (
             <div className="catalog-grid">
@@ -433,6 +432,11 @@ export default function App() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 0.3; }
+          100% { opacity: 0.6; }
+        }
       `}</style>
 
       {/* ===== LIGHTBOX ===== */}
