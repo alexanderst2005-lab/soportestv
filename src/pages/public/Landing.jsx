@@ -100,7 +100,6 @@ export default function App() {
 
       {/* ===== MOBILE NAV ===== */}
       <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`}>
-        <button className="mobile-nav-close" onClick={() => setMenuOpen(false)}><X size={20}/></button>
         {['inicio','catalogo','instalacion','contacto'].map(id => (
           <button key={id} className="nav-link" onClick={() => scrollTo(id)}>
             {id.replace('catalogo','catálogo').replace('instalacion','instalación')}
@@ -131,7 +130,7 @@ export default function App() {
             <button className="mobile-wa-header" onClick={() => openWA('Hola, quiero información.')} aria-label="WhatsApp">
               <MessageCircle size={18}/>
             </button>
-            <button className="hamburger" onClick={() => setMenuOpen(true)} aria-label="Menú">
+            <button className={`hamburger ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Menú">
               <span/><span/><span/>
             </button>
           </div>
