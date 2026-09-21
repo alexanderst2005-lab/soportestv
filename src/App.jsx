@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 
 // Public Pages
 import Landing from './pages/public/Landing';
 
-// Admin Pages
-import AdminLayout from './layouts/AdminLayout';
+// Admin Login
 import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
-import ProductsList from './pages/admin/ProductsList';
-import ProductForm from './pages/admin/ProductForm';
-import Categories from './pages/admin/Categories';
-import GalleryManager from './pages/admin/GalleryManager';
+
+// Carga perezosa (Lazy Load) para todo el panel administrativo
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const ProductsList = lazy(() => import('./pages/admin/ProductsList'));
+const ProductForm = lazy(() => import('./pages/admin/ProductForm'));
+const Categories = lazy(() => import('./pages/admin/Categories'));
+const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -47,7 +49,13 @@ export default function App() {
         <Route path="/admin/login" element={!session ? <Login /> : <Navigate to="/admin/dashboard" replace />} />
 
         {/* Protected Admin Routes */}
-        <Route path="/admin" element={session ? <AdminLayout /> : <Navigate to="/admin/login" replace />}>
+        <Route path="/admin" element={
+          session ? 
+          <Suspense fallback={<div style={{ padding: '60px', textAlign: 'center', color: '#6C757D', fontFamily: 'sans-serif' }}>Cargando módulo de administrador...</div>}>
+            <AdminLayout />
+          </Suspense> : 
+          <Navigate to="/admin/login" replace />
+        }>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<ProductsList />} />
