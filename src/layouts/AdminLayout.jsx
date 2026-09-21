@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { LayoutDashboard, Package, Tags, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Tags, LogOut, Menu, X, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function AdminLayout() {
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { path: '/admin/products', icon: <Package size={20} />, label: 'Productos' },
     { path: '/admin/categories', icon: <Tags size={20} />, label: 'Categorías' },
+    { path: '/admin/gallery', icon: <ImageIcon size={20} />, label: 'Galería' },
   ];
 
   return (

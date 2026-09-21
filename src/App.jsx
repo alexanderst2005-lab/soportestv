@@ -12,6 +12,7 @@ import Dashboard from './pages/admin/Dashboard';
 import ProductsList from './pages/admin/ProductsList';
 import ProductForm from './pages/admin/ProductForm';
 import Categories from './pages/admin/Categories';
+import GalleryManager from './pages/admin/GalleryManager';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -51,8 +52,10 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<ProductsList />} />
           <Route path="products/new" element={<ProductForm />} />
+          <Route path="products/:id" element={<ProductForm />} />
           <Route path="products/edit/:id" element={<ProductForm />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="gallery" element={<GalleryManager />} />
         </Route>
       </Routes>
     </BrowserRouter>

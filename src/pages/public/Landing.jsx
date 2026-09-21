@@ -14,15 +14,7 @@ const openWA = (msg) => window.open(waLink(msg), '_blank');
 const formatPrice = (n) =>
   n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n) : '';
 
-const GALLERY_IMGS = [
-  'https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=400&q=50',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=50',
-];
+
 
 /* ==================== BEFORE/AFTER SLIDER ==================== */
 function BeforeAfterSlider() {
@@ -97,18 +89,19 @@ export default function App() {
     try {
       const cached = localStorage.getItem('soportestv_data_v3');
       if (cached) {
-        const { catalog } = JSON.parse(cached);
-        return catalog || [];
+        const { catalog, gallery } = JSON.parse(cached);
+        return { catalog: catalog || [], gallery: gallery || [] };
       }
-    } catch { return []; }
-    return [];
+    } catch { return { catalog: [], gallery: [] }; }
+    return { catalog: [], gallery: [] };
   };
 
-  const initialCatalog = getInitialCatalog();
+  const initialData = getInitialCatalog();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [catalog, setCatalog] = useState(initialCatalog);
-  const [loading, setLoading] = useState(initialCatalog.length === 0);
+  const [catalog, setCatalog] = useState(initialData.catalog);
+  const [gallery, setGallery] = useState(initialData.gallery);
+  const [loading, setLoading] = useState(initialData.catalog.length === 0);
   const [showWaTooltip, setShowWaTooltip] = useState(false);
   const [lightboxImg, setLightboxImg] = useState(null);
 
@@ -126,12 +119,18 @@ export default function App() {
       
       // Buscar actualizaciones en silencio por debajo (tiempo real)
       try {
-        const { data: p } = await supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id');
-        const publicCatalog = (p || []).filter(item => item.stock_status !== 'oculto');
+        const [pRes, gRes] = await Promise.all([
+          supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id'),
+          supabase.from('gallery').select('*').order('created_at', { ascending: false })
+        ]);
+        
+        const publicCatalog = (pRes.data || []).filter(item => item.stock_status !== 'oculto');
+        const galleryData = gRes.data || [];
         
         // Actualizar la pantalla y guardar nuevo caché
         setCatalog(publicCatalog); 
-        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog }));
+        setGallery(galleryData);
+        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog, gallery: galleryData }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }
@@ -395,12 +394,15 @@ export default function App() {
           <span className="section-label">Nuestro trabajo</span>
           <h2 className="section-title">GALERÍA DE <span className="text-yellow">PROYECTOS</span></h2>
           <div className="gallery-grid">
-            {GALLERY_IMGS.map((src, i) => (
-              <div key={i} className="gallery-item">
-                <img src={src} alt={`Proyecto ${i + 1}`} loading="lazy" />
+            {gallery.map((item) => (
+              <div key={item.id} className="gallery-item" onClick={() => setLightboxImg(item.image_url)} style={{ cursor: 'zoom-in' }}>
+                <img src={item.image_url} alt="Instalación" loading="lazy" />
                 <div className="gallery-overlay"><MessageCircle size={28}/></div>
               </div>
             ))}
+            {gallery.length === 0 && (
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#6C757D' }}>Aún no hay fotos en la galería.</p>
+            )}
           </div>
         </div>
       </section>
