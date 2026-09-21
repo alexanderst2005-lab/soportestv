@@ -21,72 +21,6 @@ const formatPrice = (n) =>
 
 
 
-/* ==================== BEFORE/AFTER SLIDER ==================== */
-function BeforeAfterSlider() {
-  const [pos, setPos] = useState(50);
-  const [dragging, setDragging] = useState(false);
-  const ref = useRef(null);
-
-  const getPos = useCallback((clientX) => {
-    const rect = ref.current.getBoundingClientRect();
-    const p = ((clientX - rect.left) / rect.width) * 100;
-    return Math.max(5, Math.min(95, p));
-  }, []);
-
-  const onMove = useCallback((e) => {
-    if (!dragging) return;
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    setPos(getPos(x));
-  }, [dragging, getPos]);
-
-  const start = useCallback((e) => {
-    setDragging(true);
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    setPos(getPos(x));
-  }, [getPos]);
-
-  const stop = () => setDragging(false);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', stop);
-    window.addEventListener('touchmove', onMove);
-    window.addEventListener('touchend', stop);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', stop);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', stop);
-    };
-  }, [onMove]);
-
-  return (
-    <div
-      className="ba-container"
-      ref={ref}
-      onMouseDown={start}
-      onTouchStart={start}
-    >
-      <div className="ba-img ba-after" />
-      <div className="ba-clip" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-        <div className="ba-img ba-before" />
-      </div>
-      <div className="ba-handle" style={{ left: `${pos}%` }}>
-        <div className="ba-handle-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </div>
-      </div>
-      <span className="ba-label ba-label-before">ANTES</span>
-      <span className="ba-label ba-label-after">DESPUÉS</span>
-    </div>
-  );
-}
-
 /* ==================== MAIN APP ==================== */
 export default function App() {
   const getInitialCatalog = () => {
@@ -380,16 +314,6 @@ export default function App() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ===== BEFORE / AFTER ===== */}
-      <section className="ba-section">
-        <div className="container" style={{ textAlign: 'center' }}>
-          <span className="section-label">Resultados reales</span>
-          <h2 className="section-title">EL CAMBIO ESTÁ<br/><span className="text-yellow">EN LOS DETALLES.</span></h2>
-          <p className="section-subtitle" style={{ margin: '0 auto 0' }}>Desliza para comparar el antes y después de una instalación profesional.</p>
-          <BeforeAfterSlider />
         </div>
       </section>
 
