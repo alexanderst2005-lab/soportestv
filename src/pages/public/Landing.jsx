@@ -116,9 +116,25 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Supabase fetch (Real-time update, no cache) */
+  /* Supabase fetch (Stale-While-Revalidate caching) */
   useEffect(() => {
     async function fetchData() {
+      const KEY = 'soportestv_data_v3';
+      
+      // 1. Mostrar caché primero (carga instantánea de 0 segundos)
+      const cached = localStorage.getItem(KEY);
+      if (cached) {
+        try {
+          const { catalog, services } = JSON.parse(cached);
+          if (catalog && catalog.length > 0) {
+            setCatalog(catalog);
+            setServices(services);
+            setLoading(false); // Quitar pantalla de carga inmediatamente
+          }
+        } catch { localStorage.removeItem(KEY); }
+      }
+
+      // 2. Buscar actualizaciones en silencio por debajo (tiempo real)
       try {
         const [pr, sr] = await Promise.all([
           supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id'),
@@ -126,7 +142,11 @@ export default function App() {
         ]);
         const p = pr.data || [], s = sr.data || [];
         const publicCatalog = p.filter(item => item.stock_status !== 'oculto');
-        setCatalog(publicCatalog); setServices(s);
+        
+        // Actualizar la pantalla y guardar nuevo caché
+        setCatalog(publicCatalog); 
+        setServices(s);
+        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog, services: s }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }

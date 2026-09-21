@@ -5,6 +5,43 @@ import { UploadCloud, X, Loader2 } from 'lucide-react';
 export default function ImageUploader({ images = [], onImagesChange }) {
   const [uploading, setUploading] = useState(false);
 
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const scaleSize = MAX_WIDTH / img.width;
+          let width = img.width;
+          let height = img.height;
+
+          if (scaleSize < 1) {
+            width = MAX_WIDTH;
+            height = img.height * scaleSize;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            }));
+          }, 'image/jpeg', 0.8);
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleFileChange = async (e) => {
     try {
       const files = Array.from(e.target.files);
@@ -13,14 +50,16 @@ export default function ImageUploader({ images = [], onImagesChange }) {
       setUploading(true);
       const newUrls = [];
 
-      for (const file of files) {
+      for (let file of files) {
         if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
           alert(`El archivo ${file.name} no es una imagen válida (JPG, PNG, WEBP).`);
           continue;
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        // Compress image before upload
+        file = await compressImage(file);
+
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.jpg`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
