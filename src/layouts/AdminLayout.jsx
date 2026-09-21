@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { LayoutDashboard, Package, Tags, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Tags, LogOut, Menu, X } from 'lucide-react';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -19,10 +20,28 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F9FA', color: '#343A40', fontFamily: 'Inter, sans-serif' }}>
+    <div className="admin-layout" style={{ minHeight: '100vh', background: '#F8F9FA', color: '#343A40', fontFamily: 'Inter, sans-serif' }}>
+      
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-topbar" style={{ display: 'none', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: '#0B1F3A', color: 'white' }}>
+        <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.2rem', fontWeight: 800, textTransform: 'uppercase' }}>
+          PANEL ADMIN
+        </div>
+        <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'transparent', border: 'none', color: 'white', display: 'flex' }}>
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Sidebar Overlay (Mobile) */}
+      <div 
+        className={`admin-overlay ${menuOpen ? 'open' : ''}`} 
+        onClick={() => setMenuOpen(false)}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99, display: menuOpen ? 'block' : 'none' }} 
+      />
+
       {/* Sidebar */}
-      <aside style={{ width: '250px', background: '#0B1F3A', color: 'white', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <aside className={`admin-sidebar ${menuOpen ? 'open' : ''}`} style={{ width: '250px', background: '#0B1F3A', color: 'white', display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 100, transition: 'transform 0.3s ease' }}>
+        <div className="admin-sidebar-header" style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <h2 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>PANEL ADMIN</h2>
           <div style={{ fontSize: '0.75rem', color: '#FACC15' }}>Emmanuel Obras Civiles</div>
         </div>
@@ -34,6 +53,7 @@ export default function AdminLayout() {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => setMenuOpen(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -78,11 +98,49 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
+      <main className="admin-main" style={{ padding: '30px', marginLeft: '250px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <Outlet />
         </div>
       </main>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-layout {
+            display: flex;
+            flex-direction: column;
+          }
+          .admin-mobile-topbar {
+            display: flex !important;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+          }
+          .admin-sidebar {
+            transform: translateX(-100%);
+          }
+          .admin-sidebar.open {
+            transform: translateX(0);
+          }
+          .admin-sidebar-header {
+            display: none;
+          }
+          .admin-main {
+            margin-left: 0 !important;
+            padding: 16px !important;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+          }
+          /* Fix tables overflow on mobile */
+          table {
+            display: block;
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+          }
+        }
+      `}</style>
     </div>
   );
 }
