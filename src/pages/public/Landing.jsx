@@ -8,7 +8,7 @@ import {
 import '../../index.css';
 
 const WA = '573000000000'; // ← Reemplaza con tu número real
-const waLink = (msg) => `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+const waLink = (msg) => `https://api.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`;
 const openWA = (msg) => window.open(waLink(msg), '_blank');
 
 const formatPrice = (n) =>
@@ -285,7 +285,7 @@ export default function App() {
                           alt={`${item.name} ${idx}`} 
                           loading="lazy" 
                           onClick={() => setLightboxImg(imgUrl)}
-                          style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'cover', cursor: 'zoom-in' }} 
+                          style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'contain', backgroundColor: 'rgba(255,255,255,0.02)', cursor: 'zoom-in' }} 
                         />
                       ))}
                     </div>
