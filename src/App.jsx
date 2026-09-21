@@ -484,13 +484,13 @@ export default function App() {
         <div className="container">
           <span className="section-label">Dónde operamos</span>
           <h2 className="section-title">ZONA DE <span className="text-yellow">COBERTURA</span></h2>
-          <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Pregunta por tu zona. Pronto agregaremos las ciudades.</p>
+          <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Prestamos servicio a domicilio en toda el Área Metropolitana.</p>
           <div className="coverage-tags">
-            {['Tu ciudad', 'Consulta disponibilidad', 'Atención a domicilio'].map(z => (
+            {['Medellín', 'Bello', 'Envigado', 'Sabaneta'].map(z => (
               <span key={z} className="coverage-tag">{z}</span>
             ))}
           </div>
-          <p className="coverage-note">¿No encuentras tu zona? <button style={{ background:'none', border:'none', color:'var(--yellow)', cursor:'pointer', fontWeight:600 }} onClick={() => openWA('Hola, quiero saber si tienen cobertura en mi zona.')}>Consúltanos por WhatsApp →</button></p>
+          <p className="coverage-note">¿No encuentras tu municipio? <button style={{ background:'none', border:'none', color:'var(--yellow)', cursor:'pointer', fontWeight:600 }} onClick={() => openWA('Hola, quiero saber si tienen cobertura en mi zona.')}>Consúltanos por WhatsApp →</button></p>
         </div>
       </section>
 
