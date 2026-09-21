@@ -3,11 +3,11 @@ import { supabase } from '../../supabaseClient';
 import {
   Tv, Wrench, Zap, Lock, ChevronRight, MessageCircle,
   Shield, Headphones, MapPin, Star, Menu, X, ArrowRight,
-  Package, Settings, CheckCircle, Phone
+  Package, Settings, CheckCircle, Phone, Facebook
 } from 'lucide-react';
 import '../../index.css';
 
-const WA = '573000000000'; // ← Reemplaza con tu número real
+const WA = '573012089947';
 const waLink = (msg) => `https://api.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`;
 const openWA = (msg) => { window.location.href = waLink(msg); };
 
@@ -488,9 +488,14 @@ export default function App() {
           </div>
           <div className="footer-bottom">
             <span className="footer-copyright">© {new Date().getFullYear()} Emmanuel Obras Civiles. Todos los derechos reservados.</span>
-            <button className="footer-wa-link" onClick={() => openWA('Hola, quiero contactarlos.')}>
-              <MessageCircle size={16}/> Contactar por WhatsApp
-            </button>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <a href="https://www.facebook.com/share/1LkakVUFqu/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={{ color: '#FACC15', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}>
+                <Facebook size={18}/> Facebook
+              </a>
+              <button className="footer-wa-link" onClick={() => openWA('Hola, quiero contactarlos.')}>
+                <MessageCircle size={16}/> Contactar por WhatsApp
+              </button>
+            </div>
           </div>
         </div>
       </footer>
