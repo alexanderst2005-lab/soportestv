@@ -19,7 +19,7 @@ export default function ProductForm() {
     description: '',
     category: '',
     stock_status: 'disponible',
-    image_url: ''
+    images: []
   });
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function ProductForm() {
             description: product.description || '',
             category: product.category || '',
             stock_status: product.stock_status || 'disponible',
-            image_url: product.image_url || ''
+            images: product.images || (product.image_url ? [product.image_url] : [])
           });
         }
       }
@@ -52,8 +52,8 @@ export default function ProductForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (url) => {
-    setFormData(prev => ({ ...prev, image_url: url }));
+  const handleImagesChange = (newImages) => {
+    setFormData(prev => ({ ...prev, images: newImages }));
   };
 
   const handleSubmit = async (e) => {
@@ -64,6 +64,7 @@ export default function ProductForm() {
       ...formData,
       price: parseInt(formData.price) || 0,
       old_price: formData.old_price ? parseInt(formData.old_price) : null,
+      image_url: formData.images.length > 0 ? formData.images[0] : ''
     };
 
     let error;
@@ -144,7 +145,7 @@ export default function ProductForm() {
 
           {/* Col 2 */}
           <div>
-            <ImageUploader currentImage={formData.image_url} onImageUpload={handleImageUpload} />
+            <ImageUploader images={formData.images} onImagesChange={handleImagesChange} />
           </div>
 
           <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #E9ECEF', paddingTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>

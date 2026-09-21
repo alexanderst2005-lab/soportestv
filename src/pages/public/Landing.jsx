@@ -116,32 +116,17 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Supabase fetch with localStorage cache */
+  /* Supabase fetch (Real-time update, no cache) */
   useEffect(() => {
     async function fetchData() {
-      const KEY = 'soportestv_data_v2';
-      const TTL = 60 * 60 * 1000;
-      const cached = localStorage.getItem(KEY);
-      if (cached) {
-        try {
-          const { data, timestamp } = JSON.parse(cached);
-          if (Date.now() - timestamp < TTL) {
-            setCatalog(data.catalog);
-            setServices(data.services);
-            setLoading(false);
-            return;
-          }
-        } catch { localStorage.removeItem(KEY); }
-      }
       try {
         const [pr, sr] = await Promise.all([
-          supabase.from('products').select('id,name,price,old_price,description,image_url,stock_status').order('id'),
+          supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id'),
           supabase.from('services').select('id,name,price,description,icon_name').order('id'),
         ]);
         const p = pr.data || [], s = sr.data || [];
         const publicCatalog = p.filter(item => item.stock_status !== 'oculto');
         setCatalog(publicCatalog); setServices(s);
-        localStorage.setItem(KEY, JSON.stringify({ data: { catalog: publicCatalog, services: s }, timestamp: Date.now() }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }
@@ -309,10 +294,21 @@ export default function App() {
             </div>
           ) : (
             <div className="catalog-grid">
-              {catalog.map(item => (
+              {catalog.map(item => {
+                const itemImages = (item.images && item.images.length > 0) ? item.images : (item.image_url ? [item.image_url] : []);
+                return (
                 <div key={item.id} className="product-card">
-                  <div className="product-img-wrap">
-                    <img src={item.image_url} alt={item.name} loading="lazy" />
+                  <div className="product-img-wrap" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', width: '100%', height: '100%', scrollbarWidth: 'none' }}>
+                      {itemImages.map((imgUrl, idx) => (
+                        <img key={idx} src={imgUrl} alt={`${item.name} ${idx}`} loading="lazy" style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'cover' }} />
+                      ))}
+                    </div>
+                    {itemImages.length > 1 && (
+                      <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: '4px', pointerEvents: 'none' }}>
+                        {itemImages.map((_, idx) => <div key={idx} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)' }} />)}
+                      </div>
+                    )}
                     {item.old_price && <span className="product-badge">OFERTA</span>}
                     {item.stock_status === 'agotado' && <span className="product-badge out">AGOTADO</span>}
                   </div>
