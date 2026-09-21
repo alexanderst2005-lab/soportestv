@@ -579,7 +579,24 @@ a { text-decoration: none; color: inherit; }
   padding: 4px 10px;
   border-radius: 100px;
 }
-.product-badge.out { background: rgba(255,255,255,0.2); color: white; }
+.product-badge.out { 
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(220, 38, 38, 0.95);
+  color: white; 
+  font-size: 1.6rem;
+  font-weight: 900;
+  padding: 8px 24px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  letter-spacing: 2px;
+  z-index: 2;
+}
+.img-out {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
 .product-body {
   padding: 20px;
   display: flex;

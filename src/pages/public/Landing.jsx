@@ -224,6 +224,7 @@ export default function App() {
                           alt={`${item.name} ${idx}`} 
                           loading="lazy" 
                           onClick={() => setLightboxImg(imgUrl)}
+                          className={item.stock_status === 'agotado' ? 'img-out' : ''}
                           style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'contain', backgroundColor: 'rgba(255,255,255,0.02)', cursor: 'zoom-in' }} 
                         />
                       ))}
