@@ -95,7 +95,6 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [catalog, setCatalog] = useState([]);
-  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showWaTooltip, setShowWaTooltip] = useState(false);
 
@@ -126,17 +125,12 @@ export default function App() {
 
       // 2. Buscar actualizaciones en silencio por debajo (tiempo real)
       try {
-        const [pr, sr] = await Promise.all([
-          supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id'),
-          supabase.from('services').select('id,name,price,description,icon_name').order('id'),
-        ]);
-        const p = pr.data || [], s = sr.data || [];
-        const publicCatalog = p.filter(item => item.stock_status !== 'oculto');
+        const { data: p } = await supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id');
+        const publicCatalog = (p || []).filter(item => item.stock_status !== 'oculto');
         
         // Actualizar la pantalla y guardar nuevo caché
         setCatalog(publicCatalog); 
-        setServices(s);
-        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog, services: s }));
+        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }
@@ -148,10 +142,6 @@ export default function App() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const getServiceIcon = (name) => {
-    const map = { Tv: <Tv size={28}/>, Wrench: <Wrench size={28}/>, Zap: <Zap size={28}/>, Lock: <Lock size={28}/>, Settings: <Settings size={28}/> };
-    return map[name] || <Settings size={28}/>;
-  };
 
   return (
     <>
@@ -172,7 +162,7 @@ export default function App() {
       {/* ===== MOBILE NAV ===== */}
       <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`}>
         <button className="mobile-nav-close" onClick={() => setMenuOpen(false)}><X size={20}/></button>
-        {['inicio','soportes','catalogo','instalacion','servicios','contacto'].map(id => (
+        {['inicio','catalogo','instalacion','contacto'].map(id => (
           <button key={id} className="nav-link" onClick={() => scrollTo(id)}>
             {id.replace('catalogo','catálogo').replace('instalacion','instalación')}
           </button>
@@ -193,7 +183,7 @@ export default function App() {
             </div>
           </div>
           <nav className="header-nav">
-            {[['inicio','Inicio'],['soportes','Soportes TV'],['catalogo','Catálogo'],['instalacion','Instalación'],['servicios','Servicios'],['contacto','Contacto']].map(([id, label]) => (
+            {[['inicio','Inicio'],['catalogo','Catálogo'],['instalacion','Instalación'],['contacto','Contacto']].map(([id, label]) => (
               <button key={id} className="nav-link" onClick={() => scrollTo(id)}>{label}</button>
             ))}
             <button className="btn btn-yellow btn-sm" onClick={() => openWA('Hola, quiero cotizar.')}>COTIZAR AHORA</button>
@@ -220,7 +210,7 @@ export default function App() {
               SOLUCIONES<br/>PARA TU HOGAR.<br/>
               <span>INSTALADAS POR<br/>PROFESIONALES.</span>
             </h1>
-            <p className="hero-desc">Venta de soportes para TV, instalación y servicios profesionales para el hogar.</p>
+            <p className="hero-desc">Venta de soportes para TV e instalación profesional para tu hogar.</p>
             <div className="hero-buttons">
               <button className="btn btn-yellow btn-lg" onClick={() => scrollTo('catalogo')}>VER SOPORTES</button>
               <button className="btn btn-wa btn-lg" onClick={() => openWA('Hola, vengo de la página web y quiero información.')}>
@@ -228,7 +218,7 @@ export default function App() {
               </button>
             </div>
             <div className="hero-badges">
-              {['VENTA','INSTALACIÓN','SERVICIOS A DOMICILIO'].map(b => (
+              {['VENTA','INSTALACIÓN A DOMICILIO'].map(b => (
                 <div key={b} className="hero-badge">
                   <span className="hero-badge-dot"/>
                   {b}
@@ -246,13 +236,13 @@ export default function App() {
             <div>
               <span className="section-label">Quiénes somos</span>
               <h2 className="section-title">TODO LO QUE NECESITAS,<br/><span className="text-yellow">EN UN SOLO LUGAR.</span></h2>
-              <p className="section-subtitle">En Emmanuel Obras Civiles ofrecemos productos, instalaciones y servicios para ayudarte a mejorar, mantener y transformar tus espacios.</p>
+              <p className="section-subtitle">En Emmanuel Obras Civiles ofrecemos la mejor asesoría, venta e instalación de soportes para TV con acabados perfectos.</p>
             </div>
             <div className="pres-blocks">
               {[
-                { icon: <Package size={24}/>, title: 'Productos', desc: 'Soportes para TV y diferentes soluciones para el hogar.' },
-                { icon: <Wrench size={24}/>, title: 'Instalaciones', desc: 'Montaje e instalación profesional con acabados perfectos.' },
-                { icon: <CheckCircle size={24}/>, title: 'Servicios', desc: 'Soluciones y atención directamente donde las necesitas.' },
+                { icon: <Package size={24}/>, title: 'Productos', desc: 'Soportes para TV de la mejor calidad y para todas las medidas.' },
+                { icon: <Wrench size={24}/>, title: 'Instalaciones', desc: 'Montaje e instalación profesional con seguridad garantizada.' },
+                { icon: <CheckCircle size={24}/>, title: 'A Domicilio', desc: 'Llevamos el producto y realizamos el montaje en tu hogar u oficina.' },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="pres-block">
                   <div className="pres-icon">{icon}</div>
@@ -357,41 +347,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* ===== SERVICES ===== */}
-      <section className="services-section" id="servicios">
-        <div className="container">
-          <span className="section-label">Servicios del hogar</span>
-          <h2 className="section-title">MÁS QUE<br/><span className="text-yellow">SOPORTES PARA TV.</span></h2>
-          <p className="section-subtitle">También contamos con diferentes soluciones para las necesidades de tu hogar.</p>
-          <div className="services-grid">
-            {loading ? (
-              <div className="catalog-loading" style={{ gridColumn: '1/-1' }}>Cargando servicios...</div>
-            ) : services.length > 0 ? services.map(srv => (
-              <div key={srv.id} className="service-card" onClick={() => openWA(`Hola, quiero información sobre el servicio de ${srv.name}.`)}>
-                <div className="service-icon">{getServiceIcon(srv.icon_name)}</div>
-                <h3>{srv.name}</h3>
-                <p>{srv.description}</p>
-                {srv.price && <p style={{ color: 'var(--yellow)', fontWeight: 700, fontSize: '1.1rem' }}>{formatPrice(srv.price)}</p>}
-                <button className="service-wa"><MessageCircle size={14}/> Solicitar</button>
-              </div>
-            )) : (
-              [
-                { icon: <Wrench size={28}/>, name: 'Plomería', desc: 'Servicio de plomería a domicilio.' },
-                { icon: <Zap size={28}/>, name: 'Electricidad', desc: 'Servicios eléctricos para el hogar.' },
-                { icon: <Lock size={28}/>, name: 'Cerrajería', desc: 'Soluciones de cerrajería.' },
-                { icon: <Tv size={28}/>, name: 'Instalación TV', desc: 'Montaje profesional de soportes.' },
-              ].map(s => (
-                <div key={s.name} className="service-card" onClick={() => openWA(`Hola, quiero información sobre ${s.name}.`)}>
-                  <div className="service-icon">{s.icon}</div>
-                  <h3>{s.name}</h3>
-                  <p>{s.desc}</p>
-                  <button className="service-wa"><MessageCircle size={14}/> Solicitar</button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* ===== WHAT DO YOU NEED ===== */}
       <section className="needs-section" id="contacto">
@@ -400,9 +355,8 @@ export default function App() {
           <h2 className="section-title">¿QUÉ <span className="text-yellow">NECESITAS?</span></h2>
           <div className="needs-grid">
             {[
-              { icon: <Package size={28}/>, title: 'Quiero Comprar', desc: 'Ver productos y soportes disponibles.', action: () => scrollTo('catalogo') },
+              { icon: <Package size={28}/>, title: 'Quiero Comprar', desc: 'Ver soportes disponibles.', action: () => scrollTo('catalogo') },
               { icon: <Wrench size={28}/>, title: 'Quiero Instalar', desc: 'Solicitar servicio de instalación profesional.', action: () => openWA('Hola, quiero cotizar la instalación de un soporte para TV.') },
-              { icon: <Phone size={28}/>, title: 'Necesito un Servicio', desc: 'Consultar servicios para el hogar a domicilio.', action: () => scrollTo('servicios') },
             ].map(({ icon, title, desc, action }) => (
               <div key={title} className="need-card" onClick={action}>
                 <div className="need-icon">{icon}</div>
@@ -491,7 +445,7 @@ export default function App() {
           <button className="btn btn-yellow btn-lg" onClick={() => openWA('Hola, vengo de la página web y necesito ayuda.')}>
             <MessageCircle size={22}/> HABLAR POR WHATSAPP
           </button>
-          <p className="final-cta-small">PRODUCTOS · INSTALACIONES · SERVICIOS</p>
+          <p className="final-cta-small">VENTA · ASESORÍA · INSTALACIONES A DOMICILIO</p>
         </div>
       </section>
 
@@ -502,22 +456,14 @@ export default function App() {
             <div className="footer-brand">
               <img src="/logo.jpg" alt="Emmanuel Obras Civiles" />
               <div className="footer-brand-name">Emmanuel Obras Civiles</div>
-              <div className="footer-brand-sub">Soportes TV & Servicios</div>
-              <p>Empresa especializada en venta e instalación de soportes para televisor y servicios profesionales para el hogar.</p>
+              <div className="footer-brand-sub">Expertos en Soportes TV</div>
+              <p>Empresa especializada en la venta e instalación profesional de soportes para televisor.</p>
             </div>
             <div className="footer-col">
-              <h4>Soportes TV</h4>
+              <h4>Secciones</h4>
               <div className="footer-links">
-                {['Soporte Fijo','Soporte Articulado','Soporte Inclinable','Soporte Móvil','Doble Brazo'].map(l => (
-                  <button key={l} className="footer-link" onClick={() => scrollTo('catalogo')}>{l}</button>
-                ))}
-              </div>
-            </div>
-            <div className="footer-col">
-              <h4>Servicios</h4>
-              <div className="footer-links">
-                {['Instalación TV','Plomería','Electricidad','Cerrajería'].map(l => (
-                  <button key={l} className="footer-link" onClick={() => scrollTo('servicios')}>{l}</button>
+                {['Catálogo','Instalación','Contacto'].map(l => (
+                  <button key={l} className="footer-link" onClick={() => scrollTo(l.toLowerCase().replace('á','a').replace('ó','o'))}>{l}</button>
                 ))}
               </div>
             </div>
