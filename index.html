@@ -12,6 +12,10 @@
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Preload hero y logo para que carguen INMEDIATAMENTE -->
+    <link rel="preload" as="image" href="/hero.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logo.jpg" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>
