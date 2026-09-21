@@ -30,18 +30,27 @@ function App() {
 
   useEffect(() => {
     async function fetchData() {
-      // 1. Cache: si ya cargamos los datos en esta sesión, los usamos al instante
-      const cached = sessionStorage.getItem('soportestv_data');
+      // Cache: usar localStorage para que persista entre sesiones (carga instantánea)
+      const CACHE_KEY = 'soportestv_data_v2';
+      const CACHE_TTL = 60 * 60 * 1000; // 1 hora
+      const cached = localStorage.getItem(CACHE_KEY);
+
       if (cached) {
-        const { catalog: cachedCatalog, services: cachedServices } = JSON.parse(cached);
-        setCatalog(cachedCatalog);
-        setServices(cachedServices);
-        setLoading(false);
-        return;
+        try {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            setCatalog(data.catalog);
+            setServices(data.services);
+            setLoading(false);
+            return;
+          }
+        } catch(e) {
+          localStorage.removeItem(CACHE_KEY);
+        }
       }
 
       try {
-        // 2. Fetch paralelo: descargamos productos y servicios al mismo tiempo
+        // Fetch paralelo: productos y servicios al mismo tiempo
         const [productsResult, servicesResult] = await Promise.all([
           supabase.from('products').select('id,name,price,old_price,description,image_url,stock_status').order('id'),
           supabase.from('services').select('id,name,price,description,icon_name').order('id'),
@@ -56,10 +65,10 @@ function App() {
         setCatalog(productsData);
         setServices(servicesData);
 
-        // 3. Guardar en sessionStorage para visitas rápidas
-        sessionStorage.setItem('soportestv_data', JSON.stringify({
-          catalog: productsData,
-          services: servicesData,
+        // Guardar en localStorage con timestamp para TTL
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: { catalog: productsData, services: servicesData },
+          timestamp: Date.now(),
         }));
       } catch (error) {
         console.error('Error fetching data from Supabase:', error);
