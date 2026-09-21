@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 
 export default function ProductsList() {
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     setLoading(true);
+
+    // Apply Optimistic State immediately
+    if (location.state?.optimisticProduct) {
+      const opt = location.state.optimisticProduct;
+      if (location.state.isEditing) {
+        setProducts(prev => prev.map(p => p.id == location.state.id ? { ...p, ...opt } : p));
+      } else {
+        setProducts(prev => [{ ...opt, id: 'temp-' + Date.now() }, ...prev]);
+      }
+      // Clear location state so it doesn't re-apply on refresh
+      window.history.replaceState({}, document.title);
+    }
+
     const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
     if (!error) setProducts(data || []);
     setLoading(false);

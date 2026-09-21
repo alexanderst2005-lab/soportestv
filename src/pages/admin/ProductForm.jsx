@@ -67,23 +67,15 @@ export default function ProductForm() {
       image_url: formData.images.length > 0 ? formData.images[0] : ''
     };
 
-    let error;
-
+    // Optimistic Save (Fire and Forget)
     if (isEditing) {
-      const { error: updateError } = await supabase.from('products').update(productData).eq('id', id);
-      error = updateError;
+      supabase.from('products').update(productData).eq('id', id).then();
     } else {
-      const { error: insertError } = await supabase.from('products').insert([productData]);
-      error = insertError;
+      supabase.from('products').insert([productData]).then();
     }
 
-    setLoading(false);
-
-    if (error) {
-      alert('Error guardando producto: ' + error.message);
-    } else {
-      navigate('/admin/products');
-    }
+    // Instantly redirect with optimistic state
+    navigate('/admin/products', { state: { optimisticProduct: productData, isEditing, id } });
   };
 
   return (
