@@ -79,7 +79,7 @@ a { text-decoration: none; color: inherit; }
 }
 .section-title {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 800;
   text-transform: uppercase;
   line-height: 1.05;
@@ -341,7 +341,7 @@ a { text-decoration: none; color: inherit; }
 }
 .hero-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
   font-weight: 900;
   text-transform: uppercase;
   line-height: 1.0;
@@ -455,12 +455,11 @@ a { text-decoration: none; color: inherit; }
   position: relative;
   border-radius: var(--radius-md);
   overflow: hidden;
-  aspect-ratio: 3/4;
+  aspect-ratio: 4/3;
   cursor: pointer;
   transition: var(--transition);
 }
 .category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-.category-card:nth-child(1), .category-card:nth-child(4) { aspect-ratio: 3/5; }
 .category-card-bg {
   position: absolute;
   inset: 0;
@@ -556,7 +555,7 @@ a { text-decoration: none; color: inherit; }
 }
 .product-img-wrap {
   position: relative;
-  aspect-ratio: 4/3;
+  aspect-ratio: 16/10;
   overflow: hidden;
   background: rgba(255,255,255,0.03);
 }
