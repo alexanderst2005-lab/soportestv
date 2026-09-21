@@ -92,11 +92,25 @@ function BeforeAfterSlider() {
 
 /* ==================== MAIN APP ==================== */
 export default function App() {
+  const getInitialCatalog = () => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const cached = localStorage.getItem('soportestv_data_v3');
+      if (cached) {
+        const { catalog } = JSON.parse(cached);
+        return catalog || [];
+      }
+    } catch { return []; }
+    return [];
+  };
+
+  const initialCatalog = getInitialCatalog();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [catalog, setCatalog] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [catalog, setCatalog] = useState(initialCatalog);
+  const [loading, setLoading] = useState(initialCatalog.length === 0);
   const [showWaTooltip, setShowWaTooltip] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState(null);
 
   /* Scroll effect */
   useEffect(() => {
@@ -110,20 +124,7 @@ export default function App() {
     async function fetchData() {
       const KEY = 'soportestv_data_v3';
       
-      // 1. Mostrar caché primero (carga instantánea de 0 segundos)
-      const cached = localStorage.getItem(KEY);
-      if (cached) {
-        try {
-          const { catalog, services } = JSON.parse(cached);
-          if (catalog && catalog.length > 0) {
-            setCatalog(catalog);
-            setServices(services);
-            setLoading(false); // Quitar pantalla de carga inmediatamente
-          }
-        } catch { localStorage.removeItem(KEY); }
-      }
-
-      // 2. Buscar actualizaciones en silencio por debajo (tiempo real)
+      // Buscar actualizaciones en silencio por debajo (tiempo real)
       try {
         const { data: p } = await supabase.from('products').select('id,name,price,old_price,description,image_url,images,stock_status').order('id');
         const publicCatalog = (p || []).filter(item => item.stock_status !== 'oculto');
@@ -279,7 +280,14 @@ export default function App() {
                   <div className="product-img-wrap" style={{ position: 'relative', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', width: '100%', height: '100%', scrollbarWidth: 'none' }}>
                       {itemImages.map((imgUrl, idx) => (
-                        <img key={idx} src={imgUrl} alt={`${item.name} ${idx}`} loading="lazy" style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'cover' }} />
+                        <img 
+                          key={idx} 
+                          src={imgUrl} 
+                          alt={`${item.name} ${idx}`} 
+                          loading="lazy" 
+                          onClick={() => setLightboxImg(imgUrl)}
+                          style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'cover', cursor: 'zoom-in' }} 
+                        />
                       ))}
                     </div>
                     {itemImages.length > 1 && (
@@ -488,6 +496,27 @@ export default function App() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
+
+      {/* ===== LIGHTBOX ===== */}
+      {lightboxImg && (
+        <div 
+          style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setLightboxImg(null)}
+        >
+          <button 
+            onClick={() => setLightboxImg(null)}
+            style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <X size={24} />
+          </button>
+          <img 
+            src={lightboxImg} 
+            alt="Ampliación" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '95vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }} 
+          />
+        </div>
+      )}
     </>
   );
 }
