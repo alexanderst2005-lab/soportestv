@@ -12,8 +12,18 @@ export default function GalleryManager() {
   }, []);
 
   const fetchGallery = async () => {
-    const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-    if (data) setGallery(data);
+    const cached = localStorage.getItem('admin_gallery');
+    if (cached) {
+      setGallery(JSON.parse(cached));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    const { data, error } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      setGallery(data);
+      localStorage.setItem('admin_gallery', JSON.stringify(data));
+    }
     setLoading(false);
   };
 

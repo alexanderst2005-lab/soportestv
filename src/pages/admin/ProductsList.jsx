@@ -9,7 +9,13 @@ export default function ProductsList() {
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
-    setLoading(true);
+    const cached = localStorage.getItem('admin_products');
+    if (cached) {
+      setProducts(JSON.parse(cached));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
 
     // Apply Optimistic State immediately
     if (location.state?.optimisticProduct) {
@@ -24,7 +30,10 @@ export default function ProductsList() {
     }
 
     const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
-    if (!error) setProducts(data || []);
+    if (!error && data) {
+      setProducts(data);
+      localStorage.setItem('admin_products', JSON.stringify(data));
+    }
     setLoading(false);
   };
 

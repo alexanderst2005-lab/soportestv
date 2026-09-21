@@ -128,7 +128,7 @@ export default function AdminLayout() {
           }
           .admin-main {
             margin-left: 0 !important;
-            padding: 16px !important;
+            padding: 12px !important;
             width: 100%;
             box-sizing: border-box;
             overflow-x: hidden;
@@ -139,6 +139,13 @@ export default function AdminLayout() {
             max-width: 100%;
             overflow-x: auto;
             white-space: nowrap;
+          }
+          th, td {
+            padding: 10px !important;
+            font-size: 0.85rem !important;
+          }
+          h1 {
+            font-size: 1.8rem !important;
           }
         }
       `}</style>
