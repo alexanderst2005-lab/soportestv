@@ -9,7 +9,7 @@ import '../../index.css';
 
 const WA = '573000000000'; // ← Reemplaza con tu número real
 const waLink = (msg) => `https://api.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`;
-const openWA = (msg) => window.open(waLink(msg), '_blank');
+const openWA = (msg) => { window.location.href = waLink(msg); };
 
 const formatPrice = (n) =>
   n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n) : '';
