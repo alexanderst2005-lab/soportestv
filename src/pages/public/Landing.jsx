@@ -326,7 +326,6 @@ export default function App() {
             {gallery.map((item) => (
               <div key={item.id} className="gallery-item" onClick={() => setLightboxImg(item.image_url)} style={{ cursor: 'zoom-in' }}>
                 <img src={item.image_url} alt="Instalación" loading="lazy" />
-                <div className="gallery-overlay"><MessageCircle size={28}/></div>
               </div>
             ))}
             {gallery.length === 0 && (
@@ -365,7 +364,7 @@ export default function App() {
           <h2 className="section-title">ZONA DE <span className="text-yellow">COBERTURA</span></h2>
           <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Prestamos servicio a domicilio en toda el Área Metropolitana.</p>
           <div className="coverage-tags">
-            {['Medellín', 'Bello', 'Envigado', 'Sabaneta'].map(z => (
+            {['Medellín', 'Bello', 'Niquia', 'Envigado', 'Sabaneta'].map(z => (
               <span key={z} className="coverage-tag">{z}</span>
             ))}
           </div>
