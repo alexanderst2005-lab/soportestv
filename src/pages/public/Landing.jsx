@@ -25,15 +25,6 @@ const GALLERY_IMGS = [
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
 ];
 
-const SUPPORT_CATEGORIES = [
-  { tag: 'Más vendido', title: 'Soporte Articulado', subtitle: '32" – 65" • Doble brazo', img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=600&q=80' },
-  { tag: 'Económico', title: 'Soporte Fijo', subtitle: '32" – 55" • Ultra delgado', img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80' },
-  { tag: 'Premium', title: 'Soporte Móvil', subtitle: '32" – 70" • Con ruedas', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80' },
-  { tag: 'Popular', title: 'Soporte Inclinable', subtitle: '26" – 55" • -15°/+5°', img: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=600&q=80' },
-  { tag: 'Profesional', title: 'Doble Brazo', subtitle: '40" – 80" • 360° rotación', img: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=600&q=80' },
-  { tag: 'Especial', title: 'Tamaños Grandes', subtitle: '65" – 100" • Heavy duty', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80' },
-];
-
 /* ==================== BEFORE/AFTER SLIDER ==================== */
 function BeforeAfterSlider() {
   const [pos, setPos] = useState(50);
@@ -273,28 +264,6 @@ export default function App() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== TV SUPPORTS ===== */}
-      <section className="supports-section" id="soportes">
-        <div className="container">
-          <span className="section-label">Catálogo principal</span>
-          <h2 className="section-title">TU TV. TU ESPACIO.<br/><span className="text-yellow">TU ESTILO.</span></h2>
-          <p className="section-subtitle">Encuentra el soporte ideal para tu televisor y dale a tu espacio un acabado moderno y funcional.</p>
-          <div className="supports-categories">
-            {SUPPORT_CATEGORIES.map((cat) => (
-              <div key={cat.title} className="category-card" onClick={() => scrollTo('catalogo')}>
-                <div className="category-card-bg" style={{ backgroundImage: `url(${cat.img})` }} />
-                <div className="category-card-overlay" />
-                <div className="category-card-content">
-                  <span className="category-card-tag">{cat.tag}</span>
-                  <div className="category-card-title">{cat.title}</div>
-                  <div className="category-card-subtitle">{cat.subtitle}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
