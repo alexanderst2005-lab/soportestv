@@ -30,29 +30,44 @@ function App() {
 
   useEffect(() => {
     async function fetchData() {
+      // 1. Cache: si ya cargamos los datos en esta sesión, los usamos al instante
+      const cached = sessionStorage.getItem('soportestv_data');
+      if (cached) {
+        const { catalog: cachedCatalog, services: cachedServices } = JSON.parse(cached);
+        setCatalog(cachedCatalog);
+        setServices(cachedServices);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const { data: productsData, error: productsError } = await supabase
-          .from('products')
-          .select('*')
-          .order('id');
-          
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('services')
-          .select('*')
-          .order('id');
-          
-        if (productsError) throw productsError;
-        if (servicesError) throw servicesError;
-        
-        setCatalog(productsData || []);
-        setServices(servicesData || []);
+        // 2. Fetch paralelo: descargamos productos y servicios al mismo tiempo
+        const [productsResult, servicesResult] = await Promise.all([
+          supabase.from('products').select('id,name,price,old_price,description,image_url,stock_status').order('id'),
+          supabase.from('services').select('id,name,price,description,icon_name').order('id'),
+        ]);
+
+        if (productsResult.error) throw productsResult.error;
+        if (servicesResult.error) throw servicesResult.error;
+
+        const productsData = productsResult.data || [];
+        const servicesData = servicesResult.data || [];
+
+        setCatalog(productsData);
+        setServices(servicesData);
+
+        // 3. Guardar en sessionStorage para visitas rápidas
+        sessionStorage.setItem('soportestv_data', JSON.stringify({
+          catalog: productsData,
+          services: servicesData,
+        }));
       } catch (error) {
         console.error('Error fetching data from Supabase:', error);
       } finally {
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, []);
 
