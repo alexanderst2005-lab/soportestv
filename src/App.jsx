@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Tv, 
   Wrench, 
@@ -10,38 +10,51 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { supabase } from './supabaseClient';
 import './App.css';
 
 const WHATSAPP_NUMBER = "573000000000"; // Replace con número real
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=`;
 
 const formatPrice = (price) => {
+  if (!price) return '';
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(price);
 };
 
-const catalog = [
-  { id: 1, name: 'Soporte móvil TV 32"-43"', price: 95000, oldPrice: 98000, desc: 'Soporte p3, compatible con varias marcas', img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 2, name: 'Soporte para TV P4 32" a 58"', price: 105000, oldPrice: 110000, desc: 'Soporte movible, excelente rango de movimiento', img: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 3, name: 'Soporte LP610', price: 290000, oldPrice: 320000, desc: 'Soporte brazo largo 80cm', img: 'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 4, name: 'Soporte móvil pedestal 32" a 70"', price: 290000, oldPrice: 310000, desc: 'Soporte móvil pedestal con ruedas', img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 5, name: 'Soporte doble brazo P5 32"- 65"', price: 145000, oldPrice: 155000, desc: 'Soporte doble brazo ultra resistente', img: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 6, name: 'Soporte TV doble brazo 32"-75" p6', price: 170000, oldPrice: 180000, desc: 'Soporte doble brazo para pantallas grandes', img: 'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Soportes' },
-  { id: 7, name: 'Centro entretenimiento para TV', price: 1706400, oldPrice: 1800000, desc: 'Eleva el estilo de tu sala', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Hogar' },
-  { id: 8, name: 'Repisa para codificador', price: 25000, oldPrice: 28000, desc: 'Repisa elegante y práctica', img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Hogar' },
-  { id: 9, name: 'Tendedero de ropa 80cm x 1m', price: 185000, oldPrice: 188000, desc: 'Tendedero de ropa plegable', img: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Hogar' },
-  { id: 10, name: 'Hidrolavadora inalámbrica', price: 87000, oldPrice: 92000, desc: 'Alta presión, portátil', img: 'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Herramientas' },
-  { id: 11, name: 'Cortina enrollable 2 en 1', price: 274900, oldPrice: null, desc: '100x170cm blanco cuarzo', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', cat: 'Hogar' },
-];
-
-const services = [
-  { id: 1, name: 'Instalación soportes TV', price: 60000, desc: 'Instalación profesional, segura y limpia.', icon: <Tv size={32} /> },
-  { id: 2, name: 'Servicio plomero a domicilio', price: 60000, desc: 'Solución a fugas y reparaciones.', icon: <CheckCircle2 size={32} /> },
-  { id: 3, name: 'Servicio eléctrico a domicilio', price: 100000, desc: 'Arreglos y cableado seguro.', icon: <ShieldCheck size={32} /> },
-  { id: 4, name: 'Servicio cerrajería', price: 60000, desc: 'Aperturas y cambio de cerraduras.', icon: <Wrench size={32} /> },
-];
-
+// Supabase data states
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [catalog, setCatalog] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .order('id');
+          
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('services')
+          .select('*')
+          .order('id');
+          
+        if (productsError) throw productsError;
+        if (servicesError) throw servicesError;
+        
+        setCatalog(productsData || []);
+        setServices(servicesData || []);
+      } catch (error) {
+        console.error('Error fetching data from Supabase:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, []);
 
   const handleWhatsApp = (message) => {
     window.open(`${WHATSAPP_BASE_URL}${encodeURIComponent(message)}`, '_blank');
@@ -132,17 +145,19 @@ function App() {
           <h2 className="section-title">PRODUCTOS DESTACADOS</h2>
           
           <div className="products-grid">
-            {catalog.map(item => (
+            {loading ? (
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Cargando catálogo en vivo...</p>
+            ) : catalog.map(item => (
               <div className="product-card glass-card" key={item.id} onClick={() => handleWhatsApp(`Hola, me interesa comprar el ${item.name} por ${formatPrice(item.price)}.`)}>
                 <div className="product-image-container">
-                  <img src={item.img} alt={item.name} className="product-image" />
+                  <img src={item.image_url} alt={item.name} className="product-image" />
                 </div>
                 <div className="product-content">
                   <h3 className="product-name">{item.name}</h3>
-                  <p className="product-desc">{item.desc}</p>
+                  <p className="product-desc">{item.description}</p>
                   <div className="product-price-row">
                     <span className="product-price">{formatPrice(item.price)}</span>
-                    {item.oldPrice && <span className="product-old-price">{formatPrice(item.oldPrice)}</span>}
+                    {item.old_price && <span className="product-old-price">{formatPrice(item.old_price)}</span>}
                   </div>
                   <button className="btn btn-outline product-btn desktop-only">COMPRAR AHORA</button>
                 </div>
@@ -201,24 +216,35 @@ function App() {
           <h2 className="section-title">Y SI TU CASA NECESITA MÁS...</h2>
           
           <div className="products-grid">
-            {services.map(srv => (
-              <div className="product-card glass-card" key={srv.id} onClick={() => handleWhatsApp(`Hola, necesito el ${srv.name}.`)}>
-                <div className="product-icon-container">
-                  {srv.icon}
-                </div>
-                <div className="product-content">
-                  <h3 className="product-name">{srv.name}</h3>
-                  <p className="product-desc">{srv.desc}</p>
-                  <div className="product-price-row">
-                    <span className="product-price">{formatPrice(srv.price)}</span>
+            {loading ? (
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Cargando servicios en vivo...</p>
+            ) : services.map(srv => {
+              // Icon mapper
+              let ServiceIcon = Settings;
+              if (srv.icon_name === 'Tv') ServiceIcon = Tv;
+              if (srv.icon_name === 'CheckCircle2') ServiceIcon = CheckCircle2;
+              if (srv.icon_name === 'ShieldCheck') ServiceIcon = ShieldCheck;
+              if (srv.icon_name === 'Wrench') ServiceIcon = Wrench;
+
+              return (
+                <div className="product-card glass-card" key={srv.id} onClick={() => handleWhatsApp(`Hola, necesito el ${srv.name}.`)}>
+                  <div className="product-icon-container">
+                    <ServiceIcon size={32} />
                   </div>
-                  <button className="btn btn-outline product-btn desktop-only">SOLICITAR</button>
+                  <div className="product-content">
+                    <h3 className="product-name">{srv.name}</h3>
+                    <p className="product-desc">{srv.description}</p>
+                    <div className="product-price-row">
+                      <span className="product-price">{formatPrice(srv.price)}</span>
+                    </div>
+                    <button className="btn btn-outline product-btn desktop-only">SOLICITAR</button>
+                  </div>
+                  <div className="product-mobile-action mobile-only">
+                    <ChevronRight size={20} color="var(--accent-color)" />
+                  </div>
                 </div>
-                <div className="product-mobile-action mobile-only">
-                  <ChevronRight size={20} color="var(--accent-color)" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
