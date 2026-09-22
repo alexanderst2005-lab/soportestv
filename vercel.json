@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "soportestv.vercel.app"
+        }
+      ],
+      "destination": "https://soportesparatvemmanuel.com/$1",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/hero.jpg",
