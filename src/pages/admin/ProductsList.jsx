@@ -2,21 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
-
-/**
- * Deriva la URL del thumbnail a partir de la URL web.
- * Compatibilidad retroactiva: si la imagen no tiene /web/, retorna la URL original.
- */
-const getThumbUrl = (url) => {
-  if (!url) return url;
-  if (url.includes('/web/')) {
-    return url
-      .replace('/web/', '/thumb/')
-      .replace('_web.webp', '_thumb.webp')
-      .replace('_web.jpg', '_thumb.jpg');
-  }
-  return url;
-};
+import { getThumbUrl } from '../../imageUtils.js';
 
 export default function ProductsList() {
   const location = useLocation();

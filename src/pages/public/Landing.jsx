@@ -6,6 +6,7 @@ import {
   Package, Settings, CheckCircle, Phone, ThumbsUp, Music
 } from 'lucide-react';
 import '../../index.css';
+import { getWebUrl, getLightboxUrl, getThumbUrl } from '../../imageUtils.js';
 
 const WA = '573012089947';
 const waLink = (msg) => {
@@ -222,7 +223,7 @@ export default function App() {
                       {itemImages.map((imgUrl, idx) => (
                         <img 
                           key={idx} 
-                          src={imgUrl} 
+                          src={getWebUrl(imgUrl)}
                           alt={`${item.name} ${idx + 1}`}
                           /* Las primeras 2 imágenes del catálogo cargan inmediatamente (above the fold).
                              El resto se carga de forma diferida al hacer scroll. */
@@ -332,7 +333,7 @@ export default function App() {
           <div className="gallery-grid">
             {gallery.map((item) => (
               <div key={item.id} className="gallery-item" onClick={() => setLightboxImg(item.image_url)} style={{ cursor: 'zoom-in' }}>
-                <img src={item.image_url} alt="Instalación" loading="lazy" decoding="async" />
+                <img src={getThumbUrl(item.image_url)} alt="Instalación" loading="lazy" decoding="async" />
               </div>
             ))}
             {gallery.length === 0 && (
@@ -460,7 +461,7 @@ export default function App() {
             <X size={24} />
           </button>
           <img 
-            src={lightboxImg} 
+            src={getLightboxUrl(lightboxImg)} 
             alt="Ampliación" 
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: '95vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }} 

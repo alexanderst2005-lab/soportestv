@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { UploadCloud, X, Loader2 } from 'lucide-react';
+import { getThumbUrl } from '../../imageUtils.js';
 
 export default function ImageUploader({ images = [], onImagesChange }) {
   const [uploading, setUploading] = useState(false);
@@ -133,21 +134,9 @@ export default function ImageUploader({ images = [], onImagesChange }) {
   };
 
   /**
-   * Deriva la URL del thumbnail a partir de la URL web.
-   * Si la imagen fue subida con el nuevo sistema, sustituye /web/ por /thumb/
-   * y _web. por _thumb. para obtener la miniatura.
-   * Si es una imagen antigua (no tiene /web/), usa la URL original.
+   * getThumbUrl ahora viene del módulo central imageUtils.js
+   * que usa la API de transformación de Supabase para todas las imágenes.
    */
-  const getThumbUrl = (url) => {
-    if (!url) return url;
-    if (url.includes('/web/')) {
-      return url
-        .replace('/web/', '/thumb/')
-        .replace('_web.webp', '_thumb.webp')
-        .replace('_web.jpg', '_thumb.jpg');
-    }
-    return url; // imagen antigua: usar URL original
-  };
 
   return (
     <div style={{ marginBottom: '20px' }}>
