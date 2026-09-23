@@ -5,7 +5,15 @@ import { UploadCloud, X, Loader2 } from 'lucide-react';
 export default function ImageUploader({ images = [], onImagesChange }) {
   const [uploading, setUploading] = useState(false);
 
-  const compressImage = (file) => {
+  /**
+   * Genera una versión optimizada de la imagen usando Canvas.
+   * @param {File} file - Archivo de imagen original
+   * @param {number} maxWidth - Ancho máximo en px
+   * @param {number} quality - Calidad 0-1
+   * @param {string} suffix - Sufijo para el nombre del archivo ('web' o 'thumb')
+   * @returns {Promise<File>} - Archivo WebP optimizado
+   */
+  const generateOptimizedImage = (file, maxWidth, quality, suffix) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -14,14 +22,13 @@ export default function ImageUploader({ images = [], onImagesChange }) {
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const scaleSize = MAX_WIDTH / img.width;
           let width = img.width;
           let height = img.height;
 
-          if (scaleSize < 1) {
-            width = MAX_WIDTH;
-            height = img.height * scaleSize;
+          // Redimensionar si supera el ancho máximo (respetando proporción)
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
           }
 
           canvas.width = width;
@@ -29,12 +36,38 @@ export default function ImageUploader({ images = [], onImagesChange }) {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          canvas.toBlob((blob) => {
-            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            }));
-          }, 'image/jpeg', 0.8);
+          // Intentar WebP primero (soporte universal en browsers modernos)
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          const uniqueId = `${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(
+                  new File([blob], `${uniqueId}_${suffix}.webp`, {
+                    type: 'image/webp',
+                    lastModified: Date.now(),
+                  })
+                );
+              } else {
+                // Fallback a JPEG si WebP no está disponible
+                canvas.toBlob(
+                  (jpegBlob) => {
+                    resolve(
+                      new File([jpegBlob], `${uniqueId}_${suffix}.jpg`, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now(),
+                      })
+                    );
+                  },
+                  'image/jpeg',
+                  quality
+                );
+              }
+            },
+            'image/webp',
+            quality
+          );
         };
         img.onerror = (error) => reject(error);
       };
@@ -50,28 +83,39 @@ export default function ImageUploader({ images = [], onImagesChange }) {
       setUploading(true);
       const newUrls = [];
 
-      for (let file of files) {
+      for (const file of files) {
         if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
           alert(`El archivo ${file.name} no es una imagen válida (JPG, PNG, WEBP).`);
           continue;
         }
 
-        // Compress image before upload
-        file = await compressImage(file);
+        // Generar versión WEB (max 900px, calidad 78%) — para la página pública
+        const webFile = await generateOptimizedImage(file, 900, 0.78, 'web');
 
-        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.jpg`;
-        const filePath = `${fileName}`;
+        // Generar versión THUMB (max 200px, calidad 70%) — para miniaturas en el admin
+        const thumbFile = await generateOptimizedImage(file, 200, 0.70, 'thumb');
 
-        const { error: uploadError } = await supabase.storage
+        // Subir versión web
+        const { error: webError } = await supabase.storage
           .from('product-images')
-          .upload(filePath, file);
+          .upload(`web/${webFile.name}`, webFile, { upsert: false });
 
-        if (uploadError) throw uploadError;
+        if (webError) throw webError;
 
-        const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+        // Subir versión thumb
+        await supabase.storage
+          .from('product-images')
+          .upload(`thumb/${thumbFile.name}`, thumbFile, { upsert: false });
+        // No bloqueamos si falla el thumb — la web sigue funcionando
+
+        // Obtener URL pública de la versión web (la que se guarda en DB)
+        const { data } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(`web/${webFile.name}`);
+
         newUrls.push(data.publicUrl);
       }
-      
+
       onImagesChange([...images, ...newUrls]);
     } catch (error) {
       console.error('Error subiendo imagen:', error);
@@ -88,6 +132,23 @@ export default function ImageUploader({ images = [], onImagesChange }) {
     onImagesChange(newImages);
   };
 
+  /**
+   * Deriva la URL del thumbnail a partir de la URL web.
+   * Si la imagen fue subida con el nuevo sistema, sustituye /web/ por /thumb/
+   * y _web. por _thumb. para obtener la miniatura.
+   * Si es una imagen antigua (no tiene /web/), usa la URL original.
+   */
+  const getThumbUrl = (url) => {
+    if (!url) return url;
+    if (url.includes('/web/')) {
+      return url
+        .replace('/web/', '/thumb/')
+        .replace('_web.webp', '_thumb.webp')
+        .replace('_web.jpg', '_thumb.jpg');
+    }
+    return url; // imagen antigua: usar URL original
+  };
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#343A40', marginBottom: '8px' }}>
@@ -97,7 +158,15 @@ export default function ImageUploader({ images = [], onImagesChange }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px', marginBottom: '12px' }}>
         {images.map((url, i) => (
           <div key={i} style={{ position: 'relative', width: '100%', aspectRatio: '1/1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #E9ECEF' }}>
-            <img src={url} alt={`Imagen ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img
+              src={getThumbUrl(url)}
+              alt={`Imagen ${i}`}
+              loading="lazy"
+              decoding="async"
+              width={120}
+              height={120}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
             <button 
               type="button"
               onClick={() => handleRemove(i)}

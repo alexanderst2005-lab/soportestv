@@ -2,20 +2,23 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Emmanuel Obras Civiles | Soportes TV e Instalaciones</title>
     <meta name="description" content="Soportes para TV, instalaciones profesionales, servicios de plomería, electricidad y cerrajería. Entrega y montaje a domicilio." />
 
-    <!-- Preconnect: acelera la conexión a Supabase e imágenes antes de que el JS cargue -->
+    <!-- Preconnect: acelera la conexión a Supabase antes de que el JS cargue -->
     <link rel="preconnect" href="https://qejnbyywetjbemevujsj.supabase.co" />
-    <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- Preload hero y logo para que carguen INMEDIATAMENTE -->
-    <link rel="preload" as="image" href="/hero.jpg" fetchpriority="high" />
-    <link rel="preload" as="image" href="/logo.jpg" fetchpriority="high" />
+
+    <!-- DNS prefetch para el CDN de Supabase Storage (donde están las imágenes de productos) -->
+    <link rel="dns-prefetch" href="https://qejnbyywetjbemevujsj.supabase.co" />
+
+    <!-- Preload hero WebP (LCP crítico — carga inmediata) -->
+    <link rel="preload" as="image" href="/hero.webp" fetchpriority="high" type="image/webp" />
+    <!-- Preload logo WebP -->
+    <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" type="image/webp" />
   </head>
   <body>
     <div id="root"></div>

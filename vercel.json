@@ -14,8 +14,40 @@
   ],
   "headers": [
     {
+      "source": "/hero.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
       "source": "/hero.jpg",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/install-bg.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
+      "source": "/install-bg.jpg",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/after.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
+      "source": "/logo.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
     },
     {
       "source": "/logo.jpg",
@@ -23,7 +55,16 @@
     },
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
     }
   ],
   "rewrites": [

@@ -3,6 +3,21 @@ import { supabase } from '../../supabaseClient';
 import { Trash2, Image as ImageIcon } from 'lucide-react';
 import ImageUploader from '../../components/admin/ImageUploader';
 
+/**
+ * Deriva la URL del thumbnail a partir de la URL web.
+ * Compatibilidad retroactiva: si la imagen no tiene /web/, retorna la URL original.
+ */
+const getThumbUrl = (url) => {
+  if (!url) return url;
+  if (url.includes('/web/')) {
+    return url
+      .replace('/web/', '/thumb/')
+      .replace('_web.webp', '_thumb.webp')
+      .replace('_web.jpg', '_thumb.jpg');
+  }
+  return url;
+};
+
 export default function GalleryManager() {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +98,13 @@ export default function GalleryManager() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
             {gallery.map(item => (
               <div key={item.id} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', aspectRatio: '1/1', border: '1px solid #E9ECEF' }}>
-                <img src={item.image_url} alt="Galería" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img
+                  src={getThumbUrl(item.image_url)}
+                  alt="Galería"
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
                 <button 
                   onClick={() => handleDelete(item.id, item.image_url)}
                   style={{ position: 'absolute', top: '8px', right: '8px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}

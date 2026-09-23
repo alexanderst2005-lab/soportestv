@@ -28,8 +28,12 @@ export default function App() {
     try {
       const cached = localStorage.getItem('soportestv_data_v3');
       if (cached) {
-        const { catalog, gallery } = JSON.parse(cached);
-        return { catalog: catalog || [], gallery: gallery || [] };
+        const { catalog, gallery, ts } = JSON.parse(cached);
+        // Cache válido por 5 minutos — evita datos stale indefinidos
+        const isExpired = !ts || (Date.now() - ts) > 5 * 60 * 1000;
+        if (!isExpired) {
+          return { catalog: catalog || [], gallery: gallery || [] };
+        }
       }
     } catch { return { catalog: [], gallery: [] }; }
     return { catalog: [], gallery: [] };
@@ -66,10 +70,10 @@ export default function App() {
         const publicCatalog = (pRes.data || []).filter(item => item.stock_status !== 'oculto');
         const galleryData = gRes.data || [];
         
-        // Actualizar la pantalla y guardar nuevo caché
+        // Actualizar la pantalla y guardar nuevo caché con timestamp
         setCatalog(publicCatalog); 
         setGallery(galleryData);
-        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog, gallery: galleryData }));
+        localStorage.setItem(KEY, JSON.stringify({ catalog: publicCatalog, gallery: galleryData, ts: Date.now() }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }
@@ -114,7 +118,7 @@ export default function App() {
       <header className={`header ${scrolled ? 'scrolled' : ''}`} id="inicio">
         <div className="container header-inner">
           <div className="header-logo">
-            <img src="/logo.jpg" alt="Emmanuel Obras Civiles" />
+            <img src="/logo.webp" alt="Emmanuel Obras Civiles" width="46" height="46" fetchpriority="high" />
             <div className="header-logo-text">
               <span className="header-logo-name">Emmanuel</span>
               <span className="header-logo-sub">Obras Civiles</span>
@@ -219,8 +223,12 @@ export default function App() {
                         <img 
                           key={idx} 
                           src={imgUrl} 
-                          alt={`${item.name} ${idx}`} 
-                          loading="lazy" 
+                          alt={`${item.name} ${idx + 1}`}
+                          /* Las primeras 2 imágenes del catálogo cargan inmediatamente (above the fold).
+                             El resto se carga de forma diferida al hacer scroll. */
+                          loading={idx === 0 && catalog.indexOf(item) < 2 ? 'eager' : 'lazy'}
+                          fetchpriority={idx === 0 && catalog.indexOf(item) === 0 ? 'high' : 'auto'}
+                          decoding="async"
                           onClick={() => setLightboxImg(imgUrl)}
                           className={item.stock_status === 'agotado' ? 'img-out' : ''}
                           style={{ flex: '0 0 100%', width: '100%', scrollSnapAlign: 'start', objectFit: 'contain', backgroundColor: 'rgba(255,255,255,0.02)', cursor: 'zoom-in' }} 
@@ -324,7 +332,7 @@ export default function App() {
           <div className="gallery-grid">
             {gallery.map((item) => (
               <div key={item.id} className="gallery-item" onClick={() => setLightboxImg(item.image_url)} style={{ cursor: 'zoom-in' }}>
-                <img src={item.image_url} alt="Instalación" loading="lazy" />
+                <img src={item.image_url} alt="Instalación" loading="lazy" decoding="async" />
               </div>
             ))}
             {gallery.length === 0 && (
@@ -391,7 +399,7 @@ export default function App() {
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand">
-              <img src="/logo.jpg" alt="Emmanuel Obras Civiles" />
+              <img src="/logo.webp" alt="Emmanuel Obras Civiles" width="46" height="46" loading="lazy" decoding="async" />
               <div className="footer-brand-name">Emmanuel Obras Civiles</div>
               <div className="footer-brand-sub">Expertos en Soportes TV</div>
               <p>Empresa especializada en la venta e instalación profesional de soportes para televisor.</p>

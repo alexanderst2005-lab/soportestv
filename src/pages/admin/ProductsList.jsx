@@ -3,6 +3,21 @@ import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 
+/**
+ * Deriva la URL del thumbnail a partir de la URL web.
+ * Compatibilidad retroactiva: si la imagen no tiene /web/, retorna la URL original.
+ */
+const getThumbUrl = (url) => {
+  if (!url) return url;
+  if (url.includes('/web/')) {
+    return url
+      .replace('/web/', '/thumb/')
+      .replace('_web.webp', '_thumb.webp')
+      .replace('_web.jpg', '_thumb.jpg');
+  }
+  return url;
+};
+
 export default function ProductsList() {
   const location = useLocation();
   const [products, setProducts] = useState([]);
@@ -108,7 +123,15 @@ export default function ProductsList() {
                       <td style={{ padding: '16px' }}>
                         <div style={{ width: '50px', height: '50px', borderRadius: '8px', background: '#F8F9FA', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {product.image_url ? (
-                            <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img
+                              src={getThumbUrl(product.image_url)}
+                              alt={product.name}
+                              loading="lazy"
+                              decoding="async"
+                              width={50}
+                              height={50}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                           ) : (
                             <ImageIcon size={20} color="#ADB5BD" />
                           )}

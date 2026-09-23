@@ -327,7 +327,7 @@ a { text-decoration: none; color: inherit; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/hero.jpg');
+  background-image: url('/hero.webp');
   background-size: cover;
   background-position: center;
   z-index: 0;
@@ -695,7 +695,7 @@ a { text-decoration: none; color: inherit; }
 .installation-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/install-bg.jpg');
+  background-image: url('/install-bg.webp');
   background-size: cover;
   background-position: center;
   z-index: 0;
